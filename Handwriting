@@ -1,0 +1,39 @@
+//********** Handwriting **************
+  else if (digitalRead(Control) == HIGH)
+  {
+    // Serial reception
+    while ( Serial.available() > 0 ) //if data is received from the g code sender
+    {
+      char e = Serial.read();   //read the data
+      line[lineIndex] = e;  //store the data in the array
+
+      //increment the index so that  the next char is stored in the next position
+      lineIndex = lineIndex + 1;  
+
+      //check if a new line or return catridge is received - indicates end of line
+      if ((e == '\n') || (e == '\r'))
+      {
+        line[lineIndex] = '\0'; //add a null character in th end to indicate end of char array
+        
+        Serial.print("Received :");
+        Serial.println(line);
+        Serial.print("lineIndex =");
+        Serial.println(lineIndex);
+
+        //check if it is a g code or a M code
+        if ((line[0] == 'G') || (line[0] == 'M'))
+        {
+          //process the g code
+          gcode_processing(line);
+
+          //make the index to 0
+          lineIndex = 0;
+
+          //send "OK" to indicate that processing is done
+          //and the machine is ready to receive the next code
+          Serial.println("ok");
+        }
+      }
+    }
+  }
+}
